@@ -12,6 +12,8 @@ import org.springframework.statemachine.state.State;
 import spring.statemachine.constant.OrderEventEnum;
 import spring.statemachine.constant.OrderStateEnum;
 
+import java.util.EnumSet;
+
 @Slf4j
 @Configuration
 @EnableStateMachineFactory
