@@ -18,19 +18,19 @@ import java.util.EnumSet;
 @Configuration
 @EnableStateMachineFactory
 public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentState, PaymentEvent> {
-//    @Override
-//    public void configure(StateMachineConfigurationConfigurer<PaymentState, PaymentEvent> config) throws Exception {
-//        StateMachineListenerAdapter<PaymentState, PaymentEvent> adapter = new StateMachineListenerAdapter<PaymentState, PaymentEvent>() {
-//            @Override
-//            public void stateChanged(State<PaymentState, PaymentEvent> from, State<PaymentState, PaymentEvent> to) {
-//                log.info(String.format("stateChanged(from: %s, to: %s)", from + "", to + ""));
-//            }
-//        };
-//
-//        config.withConfiguration()
-//                .autoStartup(false)
-//                .listener(adapter);
-//    }
+    @Override
+    public void configure(StateMachineConfigurationConfigurer<PaymentState, PaymentEvent> config) throws Exception {
+        StateMachineListenerAdapter<PaymentState, PaymentEvent> adapter = new StateMachineListenerAdapter<>() {
+            @Override
+            public void stateChanged(State<PaymentState, PaymentEvent> from, State<PaymentState, PaymentEvent> to) {
+                log.info(String.format("stateChanged(from: %s, to: %s)", from + "", to + ""));
+            }
+        };
+
+        config.withConfiguration()
+                .autoStartup(false)
+                .listener(adapter);
+    }
 
     @Override
     public void configure(StateMachineStateConfigurer<PaymentState, PaymentEvent> states) throws Exception {
