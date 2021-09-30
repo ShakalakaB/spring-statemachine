@@ -16,7 +16,7 @@ import spring.statemachine.service.PaymentService;
 @Service
 @AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    private static final String PAYMENT_ID_HEADER = "orderId";
+    public static final String PAYMENT_ID_HEADER = "payment_id";
 
     private final PaymentRepository paymentRepository;
 
