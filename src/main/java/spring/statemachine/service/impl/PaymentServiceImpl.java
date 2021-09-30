@@ -7,11 +7,13 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import spring.statemachine.domain.Payment;
 import spring.statemachine.domain.PaymentEvent;
 import spring.statemachine.domain.PaymentState;
 import spring.statemachine.repository.PaymentRepository;
 import spring.statemachine.service.PaymentService;
+import spring.statemachine.service.PaymentStateChangeInterceptor;
 
 @Service
 @AllArgsConstructor
@@ -22,23 +24,28 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final StateMachineFactory<PaymentState, PaymentEvent> stateMachineFactory;
 
+    private final PaymentStateChangeInterceptor paymentStateChangeInterceptor;
+
     @Override
+    @Transactional
     public Payment createPayment(Payment payment) {
         payment.setState(PaymentState.SUBMITTED);
         return paymentRepository.save(payment);
     }
 
     @Override
-    public StateMachine<PaymentState, PaymentEvent> preAuth(Long paymentId) {
+    @Transactional
+    public StateMachine<PaymentState, PaymentEvent> preAuthApprove(Long paymentId) {
         StateMachine<PaymentState, PaymentEvent> stateMachine = build(paymentId);
-        sendEvent(paymentId, stateMachine, PaymentEvent.PRE_AUTHORIZE);
+        sendEvent(paymentId, stateMachine, PaymentEvent.PRE_AUTH_APPROVED);
         return stateMachine;
     }
 
     @Override
-    public StateMachine<PaymentState, PaymentEvent> authorizePayment(Long paymentId) {
+    @Transactional
+    public StateMachine<PaymentState, PaymentEvent> authorizePaymentApprove(Long paymentId) {
         StateMachine<PaymentState, PaymentEvent> stateMachine = build(paymentId);
-        sendEvent(paymentId, stateMachine, PaymentEvent.AUTHORIZE);
+        sendEvent(paymentId, stateMachine, PaymentEvent.AUTH_APPROVED);
         return stateMachine;
     }
 
@@ -49,6 +56,7 @@ public class PaymentServiceImpl implements PaymentService {
         stateMachine.start();
         stateMachine.getStateMachineAccessor()
                 .doWithAllRegions(stateMachineAccessor -> {
+                    stateMachineAccessor.addStateMachineInterceptor(paymentStateChangeInterceptor);
                     stateMachineAccessor.resetStateMachine(new DefaultStateMachineContext<>(payment.getState(), null, null, null));
                 });
         stateMachine.start();
